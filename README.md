@@ -38,4 +38,4 @@
 
 为了适配android亦或者是web 插件仅作向服务器发送请求的作用
 
-Server仓库在[TransLyric_Server](https://github/j1ans/TransLyric_Server)
+Server仓库在[TransLyric_Server](https://github.com/j1ans/TransLyric_Server)
