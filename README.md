@@ -7,7 +7,7 @@
 
 ![Static Badge](https://img.shields.io/badge/Verifed_iOS-16.6-green)
 
-![](.\icon.png)
+![](icon.png)
 
 一款能翻译Apple Music歌词的越狱插件
 
