@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>TransLyric 设置</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.akeboshi.translyricpref</string>
+			<key>key</key>
+			<string>EnabledTweak</string>
+			<key>label</key>
+			<string>启用</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSLinkListCell</string>
+			<key>default</key>
+			<string>bg</string>
+			<key>defaults</key>
+			<string>com.akeboshi.translyricpref</string>
+			<key>key</key>
+			<string>TransLyricShow</string>
+			<key>label</key>
+			<string>翻译歌词显示方式</string>
+			<key>detail</key>
+			<string>PSListItemsController</string>
+			<key>validTitles</key>
+			<array>
+				<string>使用"背景人声"来显示歌词(iOS16.2+)</string>
+				<string>直接在歌词行拼接显示(iOS13.0+)</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<string>bg</string>
+				<string>line</string>
+			</array>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>解除录屏Apple Music录音限制</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.akeboshi.translyricpref</string>
+			<key>key</key>
+			<string>EnabledRecord</string>
+			<key>label</key>
+			<string>启用</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>更多</string>
+			<key>footerText</key>
+			<string>由Macbook Air 2015 Early - 11-inch 用爱编译而成。</string>
+		</dict>
+		<dict>
+            <key>cell</key>
+            <string>PSButtonCell</string>
+            <!-- 关联的事件，在BMRootListController定义 -->
+            <key>action</key>
+            <string>github</string>
+            <!-- 按钮颜色 -->
+            <key>isDestructive</key>
+            <true/>
+            <!-- 按钮文本 -->
+            <key>label</key>
+            <string>Github:@j1ans</string>
+        </dict>
+	</array>
+	<key>title</key>
+	<string>TransLyric</string>
+</dict>
+</plist>

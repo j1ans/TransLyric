@@ -1,0 +1,10 @@
+Tweak.xm:27:40: error: non-object type 'void (__strong dispatch_queue_t, void (^__strong)(CFDictionaryRef))' (aka 'void (NSObject<OS_dispatch_queue> *__strong, void (^__strong)(CFDictionaryRef))') is not assignable
+        MRMediaRemoteGetNowPlayingInfo = (void(*)(dispatch_queue_t, void(^block)(CFDictionaryRef)))dlsym(handle, "MRMediaRemoteGetNowPlayingInfo");
+        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^
+Tweak.xm:31:14: error: address of function 'MRMediaRemoteGetNowPlayingInfo' will always evaluate to 'true' [-Werror,-Wpointer-bool-conversion]
+        if (!MRMediaRemoteGetNowPlayingInfo || !kMRMediaRemoteNowPlayingInfoTitle || !kMRMediaRemoteNowPlayingInfoArtist) {
+            ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tweak.xm:31:14: note: prefix with the address-of operator to silence this warning
+        if (!MRMediaRemoteGetNowPlayingInfo || !kMRMediaRemoteNowPlayingInfoTitle || !kMRMediaRemoteNowPlayingInfoArtist) {
+             ^
+             &
