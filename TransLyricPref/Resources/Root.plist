@@ -37,8 +37,8 @@
 			<string>PSListItemsController</string>
 			<key>validTitles</key>
 			<array>
-				<string>使用"背景人声"来显示歌词(iOS16.2+)</string>
-				<string>直接在歌词行拼接显示(iOS13.0+)</string>
+				<string>"背景人声"(iOS16.2+)</string>
+				<string>"双行歌词"(iOS13.0+)</string>
 			</array>
 			<key>validValues</key>
 			<array>

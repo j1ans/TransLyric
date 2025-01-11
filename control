@@ -1,6 +1,6 @@
 Package: com.akeboshi.translyrics
 Name: TransLyrics
-Version: 0.6.4
+Version: 0.8.8
 Architecture: iphoneos-arm
 Description: 可以将Apple Music 的歌词翻译成中文
 Maintainer: akeboshi <zengerbaba@gmail.com>

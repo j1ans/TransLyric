@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <MediaPlayer/MediaPlayer.h>
+#import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import <dlfcn.h>
@@ -10,13 +11,48 @@
 - (void)setTTML:(NSString *)ttml;
 @end
 
+@interface TTMLParser : NSObject <NSXMLParserDelegate>
+@property (nonatomic, strong) NSString *xmlLang;
+@end
+
 
 static BOOL enabled;
 static BOOL enabledrecord;
+static BOOL ShouldSkipTTML;
 static NSString *displayMode;
 
 NSString *GlobalArtistName;
 NSString *GlobalSongTitle;
+
+@implementation TTMLParser
+
+- (void)parseTTML:(NSString *)ttmlString {
+    NSData *data = [ttmlString dataUsingEncoding:NSUTF8StringEncoding];
+    NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data];
+    parser.delegate = self;
+    [parser parse];
+}
+
+// 解析根节点开始
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName 
+  namespaceURI:(NSString *)namespaceURI 
+ qualifiedName:(NSString *)qName 
+    attributes:(NSDictionary<NSString *, NSString *> *)attributeDict {
+    
+    if ([elementName isEqualToString:@"tt"]) {
+        self.xmlLang = attributeDict[@"xml:lang"];
+        NSLog(@"xml:lang = %@", self.xmlLang);
+        if([self.xmlLang isEqualToString:@"zh-Hant"]){
+            ShouldSkipTTML =  true;
+        }else if([self.xmlLang isEqualToString:@"zh-Hans"]){
+            ShouldSkipTTML =  true;
+        }else{
+            ShouldSkipTTML =  false;
+        }
+    }
+}
+
+@end
 
 // 声明函数指针类型
 typedef void (*MRMediaRemoteGetNowPlayingInfo_t)(dispatch_queue_t queue, void(^block)(CFDictionaryRef info));
@@ -57,11 +93,16 @@ NSString *base64Encode(NSString *input) {
 %hook MPModelLyrics
 - (void)setTTML:(NSString *)ttml {
 
+TTMLParser *parser = [TTMLParser new];
+[parser parseTTML:ttml];
+if(ShouldSkipTTML){
+    NSLog(@"find need skip ttml,skipping");
+    %orig;
+}else{
+
 if(enabled){
 
     __block NSString *resultTTML = ttml;
-    
-    loadMediaRemoteSymbols();
 
     if (MRMediaRemoteGetNowPlayingInfo) {
         // 添加 50ms 延迟等待播放信息更新
@@ -99,7 +140,6 @@ if(enabled){
         NSString *base64GlobalArtistName = base64Encode(GlobalArtistName ? GlobalArtistName : @"");
         NSString *base64GlobalSongTitle = base64Encode(GlobalSongTitle ? GlobalSongTitle : @"");
         //NSLog(@"Hooked TTML Lyrics");
-        if([displayMode isEqualToString:@"bg"]){
         NSURL *url = [NSURL URLWithString:@"https://shsh.iakb.org/lyric.php"];
         NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
         [request setHTTPMethod:@"POST"];
@@ -107,7 +147,13 @@ if(enabled){
         NSMutableData *body = [NSMutableData data];
         NSString *boundary = @"----WebKitFormBoundary7MA4YWxkTrZu0gW";
         [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary] forHTTPHeaderField:@"Content-Type"];
-        
+        if([displayMode isEqualToString:@"bg"]){
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"disabled_bg\"\r\n\r\n%@\r\n", @"0"] dataUsingEncoding:NSUTF8StringEncoding]];    
+        }else if([displayMode isEqualToString:@"line"]){
+        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"disabled_bg\"\r\n\r\n%@\r\n", @"1"] dataUsingEncoding:NSUTF8StringEncoding]];    
+        }
         [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"artist\"\r\n\r\n%@\r\n", base64GlobalArtistName] dataUsingEncoding:NSUTF8StringEncoding]];
         [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -135,41 +181,6 @@ if(enabled){
         [task resume];
         dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
 
-        }else if([displayMode isEqualToString:@"line"]){
-            NSURL *url = [NSURL URLWithString:@"https://shsh.iakb.org/lyric_single_qm.php"];
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-        [request setHTTPMethod:@"POST"];
-        
-        NSMutableData *body = [NSMutableData data];
-        NSString *boundary = @"----WebKitFormBoundary7MA4YWxkTrZu0gW";
-        [request setValue:[NSString stringWithFormat:@"multipart/form-data; boundary=%@", boundary] forHTTPHeaderField:@"Content-Type"];
-        
-        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"artist\"\r\n\r\n%@\r\n", base64GlobalArtistName] dataUsingEncoding:NSUTF8StringEncoding]];
-        [body appendData:[[NSString stringWithFormat:@"--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"title\"\r\n\r\n%@\r\n", base64GlobalSongTitle] dataUsingEncoding:NSUTF8StringEncoding]];
-
-        [body appendData:[[NSString stringWithFormat:@"--%@--\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
-        [request setHTTPBody:body];
-        
-        dispatch_semaphore_t semaphore = dispatch_semaphore_create(0);
-        
-        NSURLSession *session = [NSURLSession sharedSession];
-        NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-            if (error) {
-                NSLog(@"Request failed: %@", error.localizedDescription);
-            } else {
-                NSString *responseString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                NSLog(@"Server Response: %@", responseString);
-                resultTTML = responseString;
-            }
-            dispatch_semaphore_signal(semaphore);
-        }];
-        
-        [task resume];
-        dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-
-        }
 
         
 
@@ -186,6 +197,7 @@ if(enabled){
   }else{
     %orig;
   }
+}
 }
 %end
 
@@ -216,5 +228,6 @@ if(enabled){
     enabled = [[prefs objectForKey:@"EnabledTweak"] boolValue];
     enabledrecord = [[prefs objectForKey:@"EnabledRecord"] boolValue];
     displayMode = [prefs objectForKey:@"TransLyricShow"];
+    loadMediaRemoteSymbols();
 
 }
